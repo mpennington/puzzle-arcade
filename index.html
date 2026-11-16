@@ -25,6 +25,8 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;touch-action:manipulation}
+/* iOS Safari ignores touch-action set only on <html>; set it on every element (board rules with touch-action:none still win) */
+*{touch-action:manipulation}
 body{margin:0;font-family:var(--sans);background:var(--paper);color:var(--ink);
   font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 button{font-family:inherit}
@@ -2835,4 +2837,28 @@ requestAnimationFrame(squareAllBoards);setTimeout(squareAllBoards,80);
 </body>
 </html>
 
+<script>
+/* iPhone: stop double-tap zoom. A quick second tap is turned into a normal click instead of a zoom. */
+(function(){
+  var last=0,sx=0,sy=0,moved=false;
+  document.addEventListener("touchstart",function(e){
+    if(e.touches.length>1){moved=true;return;}
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;moved=false;
+  },{passive:true});
+  document.addEventListener("touchmove",function(e){
+    var t=e.touches[0];
+    if(!t||Math.abs(t.clientX-sx)>10||Math.abs(t.clientY-sy)>10)moved=true;
+  },{passive:true});
+  document.addEventListener("touchend",function(e){
+    var now=Date.now(),quick=now-last<350;last=now;
+    if(!quick||moved||e.touches.length)return;
+    var el=e.target;
+    if(el.closest&&el.closest("input,textarea,select,[contenteditable]"))return;
+    e.preventDefault();
+    var t=e.changedTouches[0];
+    el.dispatchEvent(new MouseEvent("click",{bubbles:true,cancelable:true,view:window,
+      clientX:t.clientX,clientY:t.clientY,screenX:t.screenX,screenY:t.screenY}));
+  },{passive:false});
+})();
+</script>
 </body></html>
