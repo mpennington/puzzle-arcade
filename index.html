@@ -369,7 +369,7 @@ button{font-family:inherit}
   <nav class="rail">
     <div class="rail-brand"><span class="mark">Puzzle Arcade</span><span class="dot"></span></div>
     <div><div class="rail-section-label">Games</div><div class="rail-nav" id="railNav"></div></div>
-    <div class="rail-foot">Every board has exactly one solution. The coach teaches the next move and spotlights the squares behind it — it never just fills the answer in.<span class="build-tag" style="display:block;margin-top:8px;opacity:.7">Version 2026-11-15c</span></div>
+    <div class="rail-foot">Every board has exactly one solution. The coach teaches the next move and spotlights the squares behind it — it never just fills the answer in.<span class="build-tag" style="display:block;margin-top:8px;opacity:.7">Version 2026-11-15d</span></div>
   </nav>
 
   <main class="main">
@@ -506,7 +506,7 @@ button{font-family:inherit}
         </aside>
       </div>
     </section>
-  </main>
+  <div style="margin-top:28px;font-size:11px;color:var(--muted);text-align:center">Version 2026-11-15d</div></main>
 </div>
 <script>
 /* ---- shared count-up timer ---- */
@@ -2841,6 +2841,15 @@ requestAnimationFrame(squareAllBoards);setTimeout(squareAllBoards,80);
 /* iPhone: stop double-tap zoom. A quick second tap is turned into a normal click instead of a zoom. */
 (function(){
   var last=0,sx=0,sy=0,moved=false;
+  var lastBoardStart=0;
+  /* On the game boards, block the 2nd touch of a quick double-tap at touchstart: iOS can't
+     start a zoom gesture then. Board cells use pointer events, so taps still register. */
+  document.addEventListener("touchstart",function(e){
+    if(e.touches.length!==1||!e.target.closest||!e.target.closest(".board,.sboard,.tboard,.wboard"))return;
+    var now=Date.now();
+    if(now-lastBoardStart<400)e.preventDefault();
+    lastBoardStart=now;
+  },{passive:false});
   document.addEventListener("touchstart",function(e){
     if(e.touches.length>1){moved=true;return;}
     sx=e.touches[0].clientX;sy=e.touches[0].clientY;moved=false;
